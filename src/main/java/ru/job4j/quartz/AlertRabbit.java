@@ -3,10 +3,8 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 
 import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
@@ -35,8 +33,15 @@ public class AlertRabbit {
 
     private static int getInterval(File file) {
         int interval;
-        try (FileReader reader = new FileReader(file)) {
-            interval = reader.read();
+        String str;
+        StringBuffer stringBuffer = new StringBuffer();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            while ((str = reader.readLine()) != null) {
+                stringBuffer.append(str);
+            }
+            String[] intervalString = stringBuffer.toString().split("=");
+            interval = Integer.parseInt(intervalString[1]);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
