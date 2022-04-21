@@ -14,12 +14,8 @@ public class AlertRabbit {
     public static void main(String[] args) throws FileNotFoundException {
         File file = new File("src/main/resources/rabbit.properties");
         Properties config = new Properties();
-        try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            config.load(in);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        int interval = getInterval(file);
+        Properties forInterval = properties(config);
+        int interval = Integer.parseInt(forInterval.getProperty("rabbit.interval"));
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
@@ -37,21 +33,13 @@ public class AlertRabbit {
         }
     }
 
-    private static int getInterval(File file) {
-        int interval;
-        String str;
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            while ((str = reader.readLine()) != null) {
-                stringBuilder.append(str);
-            }
-            String[] intervalString = stringBuilder.toString().split("=");
-            interval = Integer.parseInt(intervalString[1]);
+    private static Properties properties(Properties config) {
+        try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
+            config.load(in);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return interval;
+        return config;
     }
 
     public static class Rabbit implements Job {
