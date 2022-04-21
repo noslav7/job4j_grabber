@@ -4,7 +4,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.*;
-import java.util.Scanner;
+import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
@@ -12,7 +12,13 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
     public static void main(String[] args) throws FileNotFoundException {
-        File file = new File("./src/data/rabbit.properties");
+        File file = new File("src/main/resources/rabbit.properties");
+        Properties config = new Properties();
+        try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
+            config.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         int interval = getInterval(file);
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -34,13 +40,13 @@ public class AlertRabbit {
     private static int getInterval(File file) {
         int interval;
         String str;
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             while ((str = reader.readLine()) != null) {
-                stringBuffer.append(str);
+                stringBuilder.append(str);
             }
-            String[] intervalString = stringBuffer.toString().split("=");
+            String[] intervalString = stringBuilder.toString().split("=");
             interval = Integer.parseInt(intervalString[1]);
         } catch (IOException e) {
             throw new RuntimeException(e);
