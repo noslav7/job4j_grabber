@@ -11,10 +11,8 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
-    public static void main(String[] args) throws FileNotFoundException {
-        File file = new File("src/main/resources/rabbit.properties");
-        Properties config = new Properties();
-        Properties forInterval = properties(config);
+    public static void main(String[] args) {
+        Properties forInterval = properties();
         int interval = Integer.parseInt(forInterval.getProperty("rabbit.interval"));
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -33,7 +31,8 @@ public class AlertRabbit {
         }
     }
 
-    private static Properties properties(Properties config) {
+    private static Properties properties() {
+        Properties config = new Properties();
         try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             config.load(in);
         } catch (IOException e) {
