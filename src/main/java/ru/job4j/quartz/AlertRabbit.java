@@ -3,48 +3,54 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import static org.quartz.JobBuilder.*;
-import static org.quartz.TriggerBuilder.*;
-import static org.quartz.SimpleScheduleBuilder.*;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
-    public static void main(String[] args) {
-        Properties forInterval = properties();
-        int interval = Integer.parseInt(forInterval.getProperty("rabbit.interval"));
-        try {
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            scheduler.start();
-            JobDetail job = newJob(Rabbit.class).build();
-            SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(interval)
-                    .repeatForever();
-            Trigger trigger = newTrigger()
-                    .startNow()
-                    .withSchedule(times)
-                    .build();
-            scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException se) {
-            se.printStackTrace();
-        }
-    }
-
-    private static Properties properties() {
-        Properties config = new Properties();
-        try (InputStream in = Rabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            config.load(in);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return config;
+        public static void main(String[] args) {
+            try {
+                List<Long> store = new ArrayList<>();
+                Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+                scheduler.start();
+                JobDataMap data = new JobDataMap();
+                data.put("store", store);
+                JobDetail job = newJob(Rabbit.class)
+                        .usingJobData(data)
+                        .build();
+                SimpleScheduleBuilder times = simpleSchedule()
+                        .withIntervalInSeconds(5)
+                        .repeatForever();
+                Trigger trigger = newTrigger()
+                        .startNow()
+                        .withSchedule(times)
+                        .build();
+                scheduler.scheduleJob(job, trigger);
+                Thread.sleep(5000);
+                scheduler.shutdown();
+                System.out.println(store);
+            } catch (Exception se) {
+                se.printStackTrace();
+            }
     }
 
     public static class Rabbit implements Job {
+
+        public Rabbit() {
+            System.out.println(hashCode());
+        }
+
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
+            List<Long> store = (List<Long>) context.getJobDetail().getJobDataMap().get("store");
+            store.add(System.currentTimeMillis());
         }
     }
 }
