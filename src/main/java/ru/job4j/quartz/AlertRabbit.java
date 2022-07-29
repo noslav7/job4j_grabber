@@ -64,7 +64,7 @@ public class AlertRabbit {
             System.out.println("Rabbit runs here ...");
             Connection store = (Connection) context.getJobDetail().getJobDataMap().get("store");
             try (PreparedStatement statement = store.prepareStatement(
-                    "insert into rabbit(created_date) values(?);")
+                    "insert into rabbit(created_date) values(2019-04-09);")
             ) {
                 statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
                 statement.execute();
