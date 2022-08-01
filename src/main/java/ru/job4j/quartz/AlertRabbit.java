@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -22,8 +23,8 @@ public class AlertRabbit {
 
     private static final Logger LOG = LoggerFactory.getLogger(AlertRabbit.class.getName());
 
-    public static void main(String[] args) {
-        Properties properties = new Properties();
+    public static void main(String[] args) throws FileNotFoundException {
+        Properties properties = getProperties();
         try (Connection connection = getConnection(properties)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
@@ -33,7 +34,6 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(getInterval())
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -47,24 +47,13 @@ public class AlertRabbit {
         }
     }
 
-    private static int getInterval() {
-        try (FileInputStream fis = new FileInputStream("src/main/resources/rabbit.properties")) {
-            Properties properties = new Properties();
-            properties.load(fis);
-            return Integer.parseInt(properties.getProperty("rabbit.interval"));
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return 0;
-    }
-
     public static class Rabbit implements Job {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
             Connection store = (Connection) context.getJobDetail().getJobDataMap().get("store");
             try (PreparedStatement statement = store.prepareStatement(
-                    "insert into rabbit(created_date) values(2022-30-07);")
+                    "insert into rabbit(created_date) values(?);")
             ) {
                 statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
                 statement.execute();
@@ -74,9 +63,19 @@ public class AlertRabbit {
         }
     }
 
-    private static Connection getConnection(Properties properties) throws Exception {
+    public static Properties getProperties() throws FileNotFoundException {
+        Properties properties = new Properties();
         try (FileInputStream fis = new FileInputStream("src/main/resources/rabbit.properties")) {
             properties.load(fis);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return properties;
+    }
+
+    private static Connection getConnection(Properties properties) throws Exception {
+        try (InputStream ios = AlertRabbit.class.getClassLoader().getResourceAsStream("src/main/resources/rabbit.properties")) {
+            properties.load(ios);
             Class.forName(properties.getProperty("driver-class-name"));
             return DriverManager.getConnection(
                     properties.getProperty("url"),
