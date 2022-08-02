@@ -34,6 +34,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
+                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -65,7 +66,7 @@ public class AlertRabbit {
 
     public static Properties getProperties() throws FileNotFoundException {
         Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/rabbit.properties")) {
+        try (InputStream fis = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             properties.load(fis);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -74,14 +75,11 @@ public class AlertRabbit {
     }
 
     private static Connection getConnection(Properties properties) throws Exception {
-        try (InputStream ios = AlertRabbit.class.getClassLoader().getResourceAsStream("src/main/resources/rabbit.properties")) {
-            properties.load(ios);
-            Class.forName(properties.getProperty("driver-class-name"));
-            return DriverManager.getConnection(
-                    properties.getProperty("url"),
-                    properties.getProperty("username"),
-                    properties.getProperty("password")
-            );
-        }
+        Class.forName(properties.getProperty("driver-class-name"));
+        return DriverManager.getConnection(
+                properties.getProperty("url"),
+                properties.getProperty("username"),
+                properties.getProperty("password")
+        );
     }
 }
