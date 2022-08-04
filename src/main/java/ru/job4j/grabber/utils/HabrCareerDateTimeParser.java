@@ -8,12 +8,13 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class HabrCareerDateTimeParser implements DateTimeParser {
 
     @Override
     public LocalDateTime parse(String parse) throws IOException {
-        String newDate = parse.replace("+?-?.*", "");
-        return LocalDateTime.parse(newDate);
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(parse);
+        return zonedDateTime.toLocalDateTime();
     }
 }
