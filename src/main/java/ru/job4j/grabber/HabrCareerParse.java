@@ -6,6 +6,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class HabrCareerParse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -28,5 +32,22 @@ public class HabrCareerParse {
                 System.out.printf("%s %s %s %n", vacancyName, link, stringDate);
             });
         }
+    }
+
+    private String retrieveDescription(String link) throws IOException, SQLException {
+        Document document = Jsoup.connect(link).get();
+        Elements description = document.getElementsByAttributeStarting("Описание вакансии");
+
+        String query = "insert into post (id, text) values (?, ?)";
+
+        Connection conn = DriverManager.getConnection();
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+
+        for (Element row : description) {
+            preparedStmt.setString(1, row.text());
+        }
+
+        preparedStmt.execute();
+        conn.close();
     }
 }
