@@ -1,15 +1,16 @@
 package ru.job4j.grabber;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.StringJoiner;
 
 public class HabrCareerParse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -35,19 +36,15 @@ public class HabrCareerParse {
     }
 
     private String retrieveDescription(String link) throws IOException, SQLException {
-        Document document = Jsoup.connect(link).get();
-        Elements description = document.getElementsByAttributeStarting("Описание вакансии");
-
-        String query = "insert into post (id, text) values (?, ?)";
-
-        Connection conn = DriverManager.getConnection();
-        PreparedStatement preparedStmt = conn.prepareStatement(query);
-
-        for (Element row : description) {
-            preparedStmt.setString(1, row.text());
-        }
-
-        preparedStmt.execute();
-        conn.close();
+        StringJoiner descriptionText = new StringJoiner("/n");
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        Elements page = document.select(".seo-landings_show_page");
+        Elements vacancyDescription = page.select(".description");
+        vacancyDescription.forEach(row -> {
+            String text = row.text();
+            descriptionText.add(text);
+        });
+        return descriptionText.toString();
     }
 }
