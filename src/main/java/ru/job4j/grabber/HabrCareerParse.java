@@ -35,16 +35,11 @@ public class HabrCareerParse {
         }
     }
 
-    private String retrieveDescription(String link) throws IOException, SQLException {
-        StringJoiner descriptionText = new StringJoiner("/n");
-        Connection connection = Jsoup.connect(link);
-        Document document = connection.get();
-        Elements page = document.select(".seo-landings_show_page");
-        Elements vacancyDescription = page.select(".description");
-        vacancyDescription.forEach(row -> {
-            String text = row.text();
-            descriptionText.add(text);
-        });
-        return descriptionText.toString();
+    private String retrieveDescription(String link) {
+       try {
+           return Jsoup.connect(link).get().select(".vacancy-description__text").text();
+       } catch (IOException e) {
+           throw new IllegalArgumentException("Incorrect link");
+       }
     }
 }
