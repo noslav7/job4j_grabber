@@ -10,12 +10,19 @@ import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.StringJoiner;
 
-public class HabrCareerParse {
+public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
 
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
+
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     public static void main(String[] args) throws IOException {
         for (int i = 1; i <= 5; i++) {
@@ -41,5 +48,10 @@ public class HabrCareerParse {
        } catch (IOException e) {
            throw new IllegalArgumentException("Incorrect link");
        }
+    }
+
+    @Override
+    public List<Post> list(String link) {
+        return null;
     }
 }
