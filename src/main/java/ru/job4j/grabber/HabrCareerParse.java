@@ -1,17 +1,14 @@
 package ru.job4j.grabber;
 
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -24,7 +21,18 @@ public class HabrCareerParse implements Parse {
         this.dateTimeParser = dateTimeParser;
     }
 
-    public static void main(String[] args) throws IOException {
+    private String retrieveDescription(String link) {
+       try {
+           return Jsoup.connect(link).get().select(".vacancy-description__text").text();
+       } catch (IOException e) {
+           throw new IllegalArgumentException("Incorrect link");
+       }
+    }
+
+    @Override
+    public List<Post> list(String link) throws IOException {
+        List<Post> postsList = new ArrayList<>();
+        AtomicInteger id = new AtomicInteger();
         for (int i = 1; i <= 5; i++) {
             Document document = Jsoup.connect(PAGE_LINK + "?page=" + i).get();
             Elements rows = document.select(".vacancy-card__inner");
@@ -35,23 +43,12 @@ public class HabrCareerParse implements Parse {
                 Element linkElement = titleElement.child(0);
                 String vacancyName = titleElement.text();
                 String vacancyDate = dateElement.text();
-                String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+                String vacancyLink = String.format("%s%s", link, linkElement.attr("href"));
                 String stringDate = String.format("%s ", date.attr("datetime"));
-                System.out.printf("%s %s %s %n", vacancyName, link, stringDate);
+                postsList.add(new Post(id.incrementAndGet(), vacancyName, vacancyLink,
+                        vacancyName, dateTimeParser.parse(stringDate)));
             });
         }
-    }
-
-    private String retrieveDescription(String link) {
-       try {
-           return Jsoup.connect(link).get().select(".vacancy-description__text").text();
-       } catch (IOException e) {
-           throw new IllegalArgumentException("Incorrect link");
-       }
-    }
-
-    @Override
-    public List<Post> list(String link) {
-        return null;
+        return postsList;
     }
 }
