@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -26,7 +29,9 @@ public class HabrCareerParse implements Parse {
         HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
 
         for (int i = 1; i <= habrCareerParse.quantityPages; i++) {
-            System.out.println(habrCareerParse.list(SOURCE_LINK + PAGE_LINK + "?page=", i));
+            System.out.println(habrCareerParse.list(
+                    "https://career.habr.com/vacancies/java_developer?page=", i)
+                    + System.lineSeparator());
         }
     }
 
@@ -50,12 +55,16 @@ public class HabrCareerParse implements Parse {
                     Element titleElement = row.select(".vacancy-card__title").first();
                     Element date = dateElement.child(0);
                     Element linkElement = titleElement.child(0);
+                    Element descriptionLink = row.select(".vacancy-card_title-link").first();
+                    Element details = descriptionLink.child(0);
+                    String description = details.select(".vacancy-description").first();
                     String vacancyName = titleElement.text();
-                    String vacancyDate = dateElement.text();
                     String vacancyLink = String.format("%s%s", link, linkElement.attr("href"));
+                    String vacancyDescription = retrieveDescription("https://career.habr.com/vacancies/"
+                            + descriptionElement.text());
                     String stringDate = date.attr("datetime");
                     postsList.add(new Post(vacancyName, vacancyLink,
-                            vacancyName, dateTimeParser.parse(stringDate)));
+                            vacancyDescription, dateTimeParser.parse(stringDate)));
                 });
             } catch (IOException ioException) {
                 throw new IllegalArgumentException();
