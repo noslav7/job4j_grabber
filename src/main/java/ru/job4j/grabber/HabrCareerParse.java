@@ -6,19 +6,27 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
-
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
-
     private final DateTimeParser dateTimeParser;
+    private final int quantityPages = 5;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
+    }
+
+    public static void main(String[] args) {
+        HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
+
+        for (int i = 1; i <= habrCareerParse.quantityPages; i++) {
+            System.out.println(habrCareerParse.list(SOURCE_LINK + PAGE_LINK + "?page=", i));
+        }
     }
 
     private String retrieveDescription(String link) {
@@ -30,11 +38,10 @@ public class HabrCareerParse implements Parse {
     }
 
     @Override
-    public List<Post> list(String link) throws IOException {
+    public List<Post> list(String link, int pageNumber) {
         List<Post> postsList = new ArrayList<>();
-        AtomicInteger id = new AtomicInteger();
-        for (int i = 1; i <= 5; i++) {
-            Document document = Jsoup.connect(PAGE_LINK + "?page=" + i).get();
+        try {
+            Document document = Jsoup.connect(PAGE_LINK + "?page=" + pageNumber).get();
             Elements rows = document.select(".vacancy-card__inner");
             rows.forEach(row -> {
                 Element dateElement = row.select(".vacancy-card__date").first();
@@ -45,9 +52,11 @@ public class HabrCareerParse implements Parse {
                 String vacancyDate = dateElement.text();
                 String vacancyLink = String.format("%s%s", link, linkElement.attr("href"));
                 String stringDate = String.format("%s ", date.attr("datetime"));
-                postsList.add(new Post(id.incrementAndGet(), vacancyName, vacancyLink,
+                postsList.add(new Post(vacancyName, vacancyLink,
                         vacancyName, dateTimeParser.parse(stringDate)));
             });
+        } catch (IOException ioException) {
+            throw new IllegalArgumentException();
         }
         return postsList;
     }
