@@ -56,12 +56,10 @@ public class HabrCareerParse implements Parse {
                     Element date = dateElement.child(0);
                     Element linkElement = titleElement.child(0);
                     Element descriptionLink = row.select(".vacancy-card_title-link").first();
-                    Element details = descriptionLink.child(0);
-                    String description = details.select(".vacancy-description").first();
                     String vacancyName = titleElement.text();
                     String vacancyLink = String.format("%s%s", link, linkElement.attr("href"));
                     String vacancyDescription = retrieveDescription("https://career.habr.com/vacancies/"
-                            + descriptionElement.text());
+                            + "\\d{10}");
                     String stringDate = date.attr("datetime");
                     postsList.add(new Post(vacancyName, vacancyLink,
                             vacancyDescription, dateTimeParser.parse(stringDate)));
