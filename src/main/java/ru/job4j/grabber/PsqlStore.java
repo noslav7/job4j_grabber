@@ -29,7 +29,7 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = cnn.prepareStatement(
-                "insert into posts(name, text, link, created) values (?, ?, ?, ?);",
+                "insert into post(name, text, link, created) values (?, ?, ?, ?);",
                 Statement.RETURN_GENERATED_KEYS
         )) {
             statement.setString(1, post.getTitle());
@@ -51,7 +51,7 @@ public class PsqlStore implements Store, AutoCloseable {
     public List<Post> getAll() {
         List<Post> rsl = new ArrayList<>();
         try (PreparedStatement statement = cnn.prepareStatement(
-                "select * from posts;"
+                "select * from post;"
         )) {
             try (ResultSet set = statement.executeQuery()) {
                 while (set.next()) {
@@ -68,7 +68,7 @@ public class PsqlStore implements Store, AutoCloseable {
     public Post findById(int id) {
         Post rsl = null;
         try (PreparedStatement statement = cnn.prepareStatement(
-                "select * from posts where id = ?;"
+                "select * from post where id = ?;"
         )) {
             statement.setInt(1, id);
             try (ResultSet set = statement.executeQuery()) {
@@ -90,7 +90,7 @@ public class PsqlStore implements Store, AutoCloseable {
     }
 
     private Post getPost(ResultSet set) throws SQLException {
-        return Post.of(
+        return new Post(
                 set.getInt("id"),
                 set.getString("name"),
                 set.getString("link"),
