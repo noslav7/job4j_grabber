@@ -29,8 +29,8 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = cnn.prepareStatement(
-                "insert into post(name, text, link, created) values (?, ?, ?, ?)" +
-                        " ON CONFLICT (link) DO UPDATE SET link = excluded.link || ';' || post.link;",
+                "insert into post(name, text, link, created) values (?, ?, ?, ?)"
+                        + " ON CONFLICT (link) DO UPDATE SET link = excluded.link || ';' || post.link;",
                 Statement.RETURN_GENERATED_KEYS
         )) {
             statement.setString(1, post.getTitle());
