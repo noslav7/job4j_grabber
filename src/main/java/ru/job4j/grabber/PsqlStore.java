@@ -17,11 +17,11 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public static void main(String[] args) throws SQLException {
         Post postJunior = new Post("junior java developer", "https://career.habr.com/vacancies/1000115597",
-                "responsibilities: task completion", LocalDateTime.parse("2023-2-19T15:30:00"));
+                "responsibilities: task completion", LocalDateTime.now());
         Post postMiddle = new Post("middle java developer", "https://career.habr.com/vacancies/1000113405",
-                "responsibilities: project creation and execution", LocalDateTime.parse("2023-2-19T16:30:00"));
+                "responsibilities: project creation and execution", LocalDateTime.now());
         Post postSenior = new Post("senior java developer", "https://career.habr.com/vacancies/1000113428",
-                "responsibilities: problem solving", LocalDateTime.parse("2023-2-19T18:00:00"));
+                "responsibilities: problem solving", LocalDateTime.now());
 
 
         try (InputStream input = PsqlStore.class.getClassLoader().getResourceAsStream("config.properties")) {
