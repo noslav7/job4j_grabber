@@ -42,7 +42,7 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public PsqlStore(Properties cfg) throws SQLException {
         try {
-            Class.forName(cfg.getProperty("jdbc:postgresql://localhost:5432/postgres"));
+            Class.forName(cfg.getProperty("driver-class-name"));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -120,9 +120,9 @@ public class PsqlStore implements Store, AutoCloseable {
     private Post getPost(ResultSet set) throws SQLException {
         return new Post(
                 set.getInt("id"),
-                set.getString("name"),
+                set.getString("title"),
                 set.getString("link"),
-                set.getString("text"),
+                set.getString("description"),
                 set.getTimestamp("created").toLocalDateTime()
         );
     }
