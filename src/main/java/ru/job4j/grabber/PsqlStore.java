@@ -34,7 +34,7 @@ public class PsqlStore implements Store, AutoCloseable {
             store.save(postSenior);
 
             System.out.println(store.getAll());
-            System.out.println(store.findById(0));
+            System.out.println(store.findById(2));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
