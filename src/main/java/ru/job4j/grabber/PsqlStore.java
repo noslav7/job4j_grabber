@@ -42,7 +42,7 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public PsqlStore(Properties cfg) throws SQLException {
         try {
-            Class.forName(cfg.getProperty("jdbc:postgresql://[::1]:5432/postgres"));
+            Class.forName(cfg.getProperty("jdbc:postgresql://localhost:5432/postgres"));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
