@@ -76,7 +76,7 @@ public class AlertRabbit {
         Class.forName(properties.getProperty("driver-class-name"));
         return DriverManager.getConnection(
                 properties.getProperty("url"),
-                properties.getProperty("username"),
+                properties.getProperty("username_value"),
                 properties.getProperty("password")
         );
     }
