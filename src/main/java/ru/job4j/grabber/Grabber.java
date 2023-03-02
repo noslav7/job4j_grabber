@@ -39,7 +39,7 @@ public class Grabber implements Grab {
     }
 
     @Override
-    public void init() throws SchedulerException {
+    public void start() throws SchedulerException {
         JobDataMap data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
@@ -84,6 +84,6 @@ public class Grabber implements Grab {
         var parse = new HabrCareerParse(new HabrCareerDateTimeParser());
         var store = new PsqlStore(cfg);
         var time = Integer.parseInt(cfg.getProperty("time"));
-        new Grabber(parse, store, scheduler, time).init();
+        new Grabber(parse, store, scheduler, time).start();
     }
 }
