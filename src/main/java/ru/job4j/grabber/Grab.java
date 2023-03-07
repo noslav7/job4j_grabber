@@ -5,5 +5,5 @@ import org.quartz.SchedulerException;
 
 public interface Grab {
 
-    void start() throws SchedulerException;
+    void start(HabrCareerParse habrCareerParse, Store start_store, Scheduler scheduler) throws SchedulerException;
 }
