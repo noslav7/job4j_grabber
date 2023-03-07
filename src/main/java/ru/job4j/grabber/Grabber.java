@@ -51,7 +51,7 @@ public class Grabber implements Grab {
     }
 
     @Override
-    public void start(HabrCareerParse habrCareerParse, Store start_store, Scheduler scheduler) throws SchedulerException {
+    public void start(HabrCareerParse habrCareerParse, Store startStore, Scheduler startScheduler) throws SchedulerException {
         JobDataMap data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
