@@ -23,13 +23,6 @@ public class Grabber implements Grab {
     private Scheduler scheduler;
     private int time;
 
-    public Grabber(Parse parse, Store store, Scheduler scheduler, int time) {
-        this.parse = parse;
-        this.store = store;
-        this.scheduler = scheduler;
-        this.time = time;
-    }
-
     public Grabber() {
     }
 
@@ -37,10 +30,8 @@ public class Grabber implements Grab {
         return new PsqlStore(cfg);
     }
 
-    public Scheduler scheduler() throws SchedulerException {
-        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-        scheduler.start();
-        return scheduler;
+    public void scheduler() throws SchedulerException {
+        scheduler = StdSchedulerFactory.getDefaultScheduler();
     }
 
     public void cfg() throws IOException {
@@ -51,7 +42,7 @@ public class Grabber implements Grab {
     }
 
     @Override
-    public void start(HabrCareerParse habrCareerParse, Store startStore, Scheduler startScheduler) throws SchedulerException {
+    public void start() throws SchedulerException {
         JobDataMap data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
@@ -68,7 +59,7 @@ public class Grabber implements Grab {
         try {
             scheduler.scheduleJob(job, trigger);
         } catch (SchedulerException e) {
-            throw new RuntimeException(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -113,9 +104,12 @@ public class Grabber implements Grab {
     public static void main(String[] args) throws Exception {
         Grabber grab = new Grabber();
         grab.cfg();
-        Scheduler scheduler = grab.scheduler();
-        Store store = grab.store();
-        grab.start(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
-        grab.web(store);
+        grab.scheduler();
+        grab.scheduler.start();
+        grab.time = Integer.parseInt(grab.cfg.getProperty("time"));
+        grab.parse = new HabrCareerParse(new HabrCareerDateTimeParser());
+        grab.store = grab.store();
+        grab.start();
+        grab.web(grab.store);
     }
 }
