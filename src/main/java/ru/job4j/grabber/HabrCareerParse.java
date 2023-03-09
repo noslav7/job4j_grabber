@@ -5,7 +5,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +21,7 @@ public class HabrCareerParse implements Parse {
 
     public static void main(String[] args) {
         HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        habrCareerParse.list(PAGE_LINK, habrCareerParse.quantityPages).stream()
-                .map(e -> e.toString().getBytes(Charset.forName("Windows-1251")))
+        habrCareerParse.list(PAGE_LINK, habrCareerParse.quantityPages)
                 .forEach(System.out::println);
     }
 
