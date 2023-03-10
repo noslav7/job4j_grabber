@@ -1,7 +1,7 @@
 create table posts (
-id SERIAL PRIMARY KEY,
-name varchar(255),
-text text,
-link varchar(255) UNIQUE,
+id serial primary key,
+title varchar(255),
+link varchar(255) unique,
+description	varchar (6500),
 created date
 );
